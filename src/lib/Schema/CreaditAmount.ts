@@ -14,12 +14,6 @@ const creditAccountSchema = new mongoose.Schema(
         type: { type: String, enum: ["credit", "debit"], required: true },
         amount: { type: Number, required: true },
         date: { type: Date, default: Date.now },
-        note: { type: String },
-        categoryId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "ExpenseCategory",
-          default: null,
-        },
       },
     ],
   },
