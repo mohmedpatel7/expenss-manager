@@ -1,9 +1,21 @@
 import { connectDB } from "@/lib/database/dbConnection";
 import CreditAccount from "@/lib/Schema/CreaditAmount";
+import User from "@/lib/Schema/User";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
+// @ts-expect-error: nodemailer has no ESM types
+import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
+    },
+  });
   try {
     await connectDB();
 
@@ -21,6 +33,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
     const userId = decoded.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+    const email = user.email;
 
     // Parse request body
     const { currentCredit: rawCredit, type } = await req.json();
@@ -56,6 +74,13 @@ export async function POST(req: NextRequest) {
     account.currentCredit = newCredit;
     account.history.push({ type, amount: currentCredit });
     await account.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Amount updated",
+      html: ``,
+    });
 
     return NextResponse.json({ message: "Credit updated", account });
   } catch (error) {
