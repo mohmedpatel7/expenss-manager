@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/database/dbConnection";
-import CreditAccount from "@/lib/Schema/CreaditAmount";
+import Expenss from "@/lib/Schema/Expenss";
+import CreaditAmount from "@/lib/Schema/CreaditAmount";
 import User from "@/lib/Schema/User";
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { JwtPayload } from "jsonwebtoken";
@@ -16,10 +17,11 @@ export async function POST(req: NextRequest) {
       pass: process.env.PASSWORD,
     },
   });
+
   try {
     await connectDB();
 
-    // Get the usertoken header
+    // Get usertoken header
     const token = req.headers.get("usertoken");
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -32,7 +34,17 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
     const userId = decoded.id;
+
+    // Find user's credit account
+    const creditAccount = await CreaditAmount.findOne({ userId });
+    if (!creditAccount) {
+      return NextResponse.json({
+        message: "Credit account not found!.",
+        status: 404,
+      });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -41,60 +53,75 @@ export async function POST(req: NextRequest) {
     const email = user.email;
 
     // Parse request body
-    const { currentCredit: rawCredit, type } = await req.json();
-    const currentCredit = Number(rawCredit);
-    if (isNaN(currentCredit) || !type) {
+    const { title, amount: rawAmount } = await req.json();
+    const amount = Number(rawAmount);
+
+    if (isNaN(amount) || !title || amount <= 0) {
       return NextResponse.json(
         { message: "Missing or invalid fields" },
         { status: 400 }
       );
     }
-    if (!["credit", "debit"].includes(type)) {
-      return NextResponse.json({ message: "Invalid type" }, { status: 400 });
+
+    // Check if user has sufficient credit
+    if (creditAccount.currentCredit < amount) {
+      return NextResponse.json(
+        { message: "Insufficient credit balance" },
+        { status: 400 }
+      );
     }
 
-    // Find or create the user's credit account
-    let account = await CreditAccount.findOne({ userId });
-    if (!account) {
-      account = new CreditAccount({
+    // Find or create expense category
+    let expenseCategory = await Expenss.findOne({
+      userId,
+      title: title,
+    });
+
+    if (!expenseCategory) {
+      expenseCategory = new Expenss({
         userId,
-        currentCredit: 0,
-        history: [],
+        title: title,
+        creditAccountId: creditAccount._id,
+        expenses: [],
       });
     }
 
-    // Update currentCredit and add to history
-    let newCredit = account.currentCredit;
-    if (type === "credit") {
-      newCredit += currentCredit;
-    } else if (type === "debit") {
-      newCredit -= currentCredit;
-      if (newCredit < 0) newCredit = 0;
-    }
-    account.currentCredit = newCredit;
-    account.history.push({ type, amount: currentCredit });
-    await account.save();
+    // Add expense to category
+    expenseCategory.expenses.push({
+      amount,
+      type: "debit",
+      date: new Date(),
+    });
 
+    await expenseCategory.save();
+
+    // Deduct amount from credit account
+    creditAccount.currentCredit -= amount;
+    creditAccount.history.push({
+      type: "debit",
+      amount,
+      date: new Date(),
+    });
+    await creditAccount.save();
+
+    // Send email notification
     await transporter.sendMail({
       from: process.env.EMAIL,
       to: email,
-      subject: `Credit Account ${type === "credit" ? "Credited" : "Debited"}`,
+      subject: "Expense Recorded - Credit Deducted",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <h2 style="color: #333; text-align: center; margin-bottom: 30px;">Credit Account Update</h2>
+          <h2 style="color: #333; text-align: center; margin-bottom: 30px;">Expense Recorded</h2>
           
-          <div style="background-color: ${
-            type === "credit" ? "#e8f5e8" : "#ffe8e8"
-          }; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
-            <h3 style="color: ${
-              type === "credit" ? "#2d5a2d" : "#5a2d2d"
-            }; margin: 0 0 10px 0;">
-              ${type === "credit" ? "💰 Credit Added" : "💸 Debit Deducted"}
+          <div style="background-color: #ffe8e8; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+            <h3 style="color: #5a2d2d; margin: 0 0 10px 0;">
+              💸 Expense Deducted
             </h3>
-            <p style="font-size: 18px; font-weight: bold; color: ${
-              type === "credit" ? "#2d5a2d" : "#5a2d2d"
-            }; margin: 0;">
-              Amount: ₹${currentCredit.toLocaleString()}
+            <p style="font-size: 18px; font-weight: bold; color: #5a2d2d; margin: 0;">
+              Amount: ₹${amount.toLocaleString()}
+            </p>
+            <p style="font-size: 16px; color: #5a2d2d; margin: 10px 0 0 0;">
+              Category: ${title.charAt(0).toUpperCase() + title.slice(1)}
             </p>
           </div>
           
@@ -102,17 +129,14 @@ export async function POST(req: NextRequest) {
             <h4 style="color: #333; margin: 0 0 10px 0;">Account Summary</h4>
             <p style="margin: 5px 0; color: #666;">
               <strong>Previous Balance:</strong> ₹${(
-                account.currentCredit -
-                (type === "credit" ? currentCredit : -currentCredit)
+                creditAccount.currentCredit + amount
               ).toLocaleString()}
             </p>
             <p style="margin: 5px 0; color: #666;">
-              <strong>Current Balance:</strong> ₹${account.currentCredit.toLocaleString()}
+              <strong>Current Balance:</strong> ₹${creditAccount.currentCredit.toLocaleString()}
             </p>
             <p style="margin: 5px 0; color: #666;">
-              <strong>Transaction Type:</strong> ${
-                type.charAt(0).toUpperCase() + type.slice(1)
-              }
+              <strong>Transaction Type:</strong> Expense (Debit)
             </p>
           </div>
           
@@ -124,7 +148,11 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    return NextResponse.json({ message: "Credit updated", account });
+    return NextResponse.json({
+      message: "Expense recorded successfully",
+      expense: expenseCategory,
+      remainingCredit: creditAccount.currentCredit,
+    });
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error", error: (error as Error).message },
