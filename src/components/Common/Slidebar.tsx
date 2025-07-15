@@ -105,43 +105,63 @@ const Slidebar: React.FC = () => {
 
   return (
     <>
-      {/* Toggle Button for Mobile */}
+      {/* Mobile menu button */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-full shadow border border-gray-200"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen(!open)}
+        className="fixed top-4 left-4 z-50 p-2 rounded-md lg:hidden bg-white shadow-md"
         aria-label="Toggle sidebar"
       >
-        <svg
-          width="24"
-          height="24"
-          fill="none"
-          stroke="#2563eb"
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M4 6h16M4 12h16M4 18h16"
-            stroke="#2563eb"
+        {open ? (
+          <svg
+            className="h-6 w-6 text-blue-600"
+            fill="none"
+            stroke="currentColor"
             strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-        </svg>
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="h-6 w-6 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        )}
       </button>
 
+      {/* Overlay for mobile */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside
+      <div
         className={`
-          z-40 flex flex-col w-72 bg-white shadow-xl
-          fixed top-0 left-0 h-screen
+          fixed top-0 left-0 h-screen w-72 bg-white shadow-xl z-40 flex flex-col
           transform transition-transform duration-300
-          ${open ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 md:static md:block
+          ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
         style={{ minWidth: 270 }}
       >
         {/* Logo and Title */}
-        <div className="flex items-center gap-3 px-8 py-8 border-b border-gray-100 flex-shrink-0">
+        <div className="p-8 border-b border-gray-100 flex items-center gap-3">
           <div className="bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] p-2 rounded-lg">
-            {/* Simple wallet icon */}
             <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
               <rect x="3" y="7" width="18" height="10" rx="3" fill="#fff" />
               <rect x="7" y="11" width="2" height="2" rx="1" fill="#2563eb" />
@@ -157,47 +177,41 @@ const Slidebar: React.FC = () => {
           </div>
         </div>
         {/* Navigation */}
-        <nav className="flex-1 min-h-0 mt-4 px-4 overflow-y-auto">
-          <ul className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = active === item.label;
-              return (
-                <li key={item.label}>
-                  <a
-                    href={item.href}
-                    className={`
-                      flex items-center gap-3 px-4 py-2 rounded-lg transition
-                      text-base font-semibold
-                      ${
-                        isActive
-                          ? "bg-[#e0e7ff] text-[#2563eb]"
-                          : "text-[#83949b] hover:bg-[#f1f5f9] hover:text-[#2563eb]"
-                      }
-                    `}
-                  >
-                    <span className="flex-shrink-0">{item.icon(isActive)}</span>
-                    <span>{item.label}</span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+        <nav className="mt-4 px-4 space-y-1 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = active === item.label;
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition text-base font-semibold
+                  ${
+                    isActive
+                      ? "bg-[#e0e7ff] text-[#2563eb]"
+                      : "text-[#83949b] hover:bg-[#f1f5f9] hover:text-[#2563eb]"
+                  }
+                `}
+                onClick={() => setOpen(false)}
+              >
+                <span className="flex-shrink-0">{item.icon(isActive)}</span>
+                <span>{item.label}</span>
+              </a>
+            );
+          })}
         </nav>
-        {/* User section or Auth buttons at bottom */}
-        <div className="px-8 py-6 border-t border-gray-100 flex items-center gap-3 justify-between flex-shrink-0">
+        {/* Auth/User section pinned to bottom */}
+        <div className="absolute bottom-6 w-full px-8">
           {isLoggedIn ? (
-            <>
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
-                  U
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
+                U
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-black truncate">
+                  Username
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-black truncate">
-                    Username
-                  </div>
-                  <div className="text-xs text-[#83949b] truncate">
-                    user@email.com
-                  </div>
+                <div className="text-xs text-[#83949b] truncate">
+                  user@email.com
                 </div>
               </div>
               <button
@@ -225,7 +239,7 @@ const Slidebar: React.FC = () => {
                   />
                 </svg>
               </button>
-            </>
+            </div>
           ) : (
             <div className="flex gap-3 w-full">
               <button className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition">
@@ -237,15 +251,8 @@ const Slidebar: React.FC = () => {
             </div>
           )}
         </div>
-      </aside>
-
-      {/* Overlay for mobile when sidebar is open */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-20 z-30 md:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      </div>
+      {/* End Sidebar */}
     </>
   );
 };
