@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/Redux/store/store";
+import { useRouter } from "next/navigation";
 
 const navItems = [
   {
@@ -83,6 +84,8 @@ const Slidebar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // For demo, Dashboard is active
   const active = "Dashboard";
+
+  const router = useRouter();
 
   // Check login state from Redux and localStorage
   const signinState = useSelector(
@@ -191,7 +194,9 @@ const Slidebar: React.FC = () => {
                       : "text-[#83949b] hover:bg-[#f1f5f9] hover:text-[#2563eb]"
                   }
                 `}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  if (open) setOpen(false);
+                }}
               >
                 <span className="flex-shrink-0">{item.icon(isActive)}</span>
                 <span>{item.label}</span>
@@ -242,11 +247,23 @@ const Slidebar: React.FC = () => {
             </div>
           ) : (
             <div className="flex gap-3 w-full">
-              <button className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition">
+              <button
+                className="flex-1 py-2 px-4 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition"
+                onClick={() => {
+                  router.push("/signup");
+                  if (open) setOpen(false);
+                }}
+              >
                 Sign Up
               </button>
-              <button className="flex-1 py-2 px-4 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition">
-                Login
+              <button
+                className="flex-1 py-2 px-4 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
+                onClick={() => {
+                  router.push("/signin");
+                  if (open) setOpen(false);
+                }}
+              >
+                Sign In
               </button>
             </div>
           )}
