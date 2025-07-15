@@ -1,8 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "../Slices/AuthSlices";
 
-// Create the Redux store and add the encode and decode reducers
+// Create the Redux store and add the auth reducer
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    auth: authReducer,
+  },
 });
 
 // Export types for use in the app

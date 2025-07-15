@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Provider from "@/Redux/Provider/Provider";
+import Slidebar from "@/components/Common/Slidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Provider>
+          <div className="flex">
+            {/* Fixed Sidebar */}
+            <Slidebar />
+            {/* Main content with left margin = sidebar width */}
+            <div className="ml-0 lg:ml-72 w-full min-h-screen  p-6">
+              {children}
+            </div>
+          </div>
+        </Provider>
       </body>
     </html>
   );
