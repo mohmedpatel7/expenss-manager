@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/Redux/store/store";
 import { useRouter } from "next/navigation";
+import { FaChevronUp } from "react-icons/fa";
+import { useToast } from "../Common/Toast";
 
 const navItems = [
   {
@@ -84,8 +86,12 @@ const Slidebar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // For demo, Dashboard is active
   const active = "Dashboard";
+  const [showDropup, setShowDropup] = useState(false);
+  const dropupRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
+
+  const { showToast } = useToast();
 
   // Check login state from Redux and localStorage
   const signinState = useSelector(
@@ -105,6 +111,26 @@ const Slidebar: React.FC = () => {
         : null);
     setIsLoggedIn(!!token);
   }, [signinState, signupState]);
+
+  useEffect(() => {
+    // Close dropup on outside click
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropupRef.current &&
+        !dropupRef.current.contains(event.target as Node)
+      ) {
+        setShowDropup(false);
+      }
+    }
+    if (showDropup) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropup]);
 
   return (
     <>
@@ -207,7 +233,7 @@ const Slidebar: React.FC = () => {
         {/* Auth/User section pinned to bottom */}
         <div className="absolute bottom-6 w-full px-8">
           {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
                 U
               </div>
@@ -219,31 +245,44 @@ const Slidebar: React.FC = () => {
                   user@email.com
                 </div>
               </div>
+              {/* Dropup toggle button with arrow */}
               <button
-                className="ml-2 p-1 rounded hover:bg-[#e0e7ff] transition"
-                title="Logout"
+                className="ml-2 p-2 rounded-full hover:bg-[#e0e7ff] transition flex items-center justify-center focus:outline-none"
+                onClick={() => setShowDropup((prev) => !prev)}
+                tabIndex={0}
+                aria-haspopup="true"
+                aria-expanded={showDropup}
+                aria-label="Open user menu"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  fill="none"
-                  stroke="#2563eb"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M17 16l4-4m0 0l-4-4m4 4H7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3 12a9 9 0 0118 0"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <FaChevronUp
+                  className={`transition-transform ${
+                    showDropup ? "rotate-180" : "rotate-0"
+                  }`}
+                />
               </button>
+              {/* Dropup menu */}
+              {showDropup && (
+                <div
+                  ref={dropupRef}
+                  className="absolute bottom-14 right-0 mb-2 w-44 bg-white rounded-lg shadow-lg border border-gray-100 z-50 animate-fade-in"
+                >
+                  {/* Arrow */}
+                  <div className="absolute right-4 -top-2 w-4 h-4 overflow-hidden">
+                    <div className="w-4 h-4 bg-white border-l border-t border-gray-100 rotate-45 transform origin-bottom-left shadow-md"></div>
+                  </div>
+                  {/* <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg">Profile</button> */}
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg text-red-600"
+                    onClick={() => {
+                      localStorage.removeItem("usertoken");
+                      window.location.reload();
+                      showToast("Sign out success!", "error");
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex gap-3 w-full">

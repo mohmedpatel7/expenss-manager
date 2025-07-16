@@ -59,6 +59,7 @@ export const SignupUser = createAsyncThunk(
         const errorData = await response.json().catch(() => ({
           message: "Error in response!",
         }));
+        console.log(errorData);
         return rejectWithValue(errorData);
       }
 
