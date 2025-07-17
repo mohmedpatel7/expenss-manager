@@ -24,7 +24,7 @@ const navItems = [
         />
       </svg>
     ),
-    href: "#",
+    href: "/dashboard",
   },
   {
     label: "Categories",
@@ -41,40 +41,6 @@ const navItems = [
           strokeLinejoin="round"
           d="M4 6h16M4 12h16M4 18h16"
         />
-      </svg>
-    ),
-    href: "#",
-  },
-  {
-    label: "Expenses",
-    icon: (active: boolean) => (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke={active ? "#2563eb" : "#b0b8c1"}
-        strokeWidth="2.2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 8v8"
-        />
-      </svg>
-    ),
-    href: "#",
-  },
-  {
-    label: "Settings",
-    icon: (active: boolean) => (
-      <svg
-        className="w-5 h-5"
-        fill="none"
-        stroke={active ? "#2563eb" : "#b0b8c1"}
-        strokeWidth="2.2"
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
       </svg>
     ),
     href: "#",
@@ -210,9 +176,9 @@ const Slidebar: React.FC = () => {
           {navItems.map((item) => {
             const isActive = active === item.label;
             return (
-              <a
+              <button
                 key={item.label}
-                href={item.href}
+                type="button"
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition text-base font-semibold
                   ${
                     isActive
@@ -221,12 +187,21 @@ const Slidebar: React.FC = () => {
                   }
                 `}
                 onClick={() => {
+                  const token =
+                    typeof window !== "undefined"
+                      ? localStorage.getItem("usertoken")
+                      : null;
+                  if (!token) {
+                    router.push("/signin");
+                  } else {
+                    router.push(item.href);
+                  }
                   if (open) setOpen(false);
                 }}
               >
                 <span className="flex-shrink-0">{item.icon(isActive)}</span>
                 <span>{item.label}</span>
-              </a>
+              </button>
             );
           })}
         </nav>

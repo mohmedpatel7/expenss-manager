@@ -30,6 +30,8 @@ const Signup: React.FC = () => {
 
   const { showToast } = useToast();
 
+  const isUser = localStorage.getItem("usertoken");
+
   // Handle OTP input
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -156,206 +158,245 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-white p-12 rounded-xl shadow-lg overflow-hidden">
-      <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb]">
-        Sign Up
-      </h2>
-      <form autoComplete="off">
-        <div
-          key={step}
-          className={`transition-all duration-500 ${getAnimationClass()}`}
-        >
-          {step === 1 && (
-            <div>
-              {/* First row: Name and Email side by side, stack on mobile */}
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <div className="flex-1">
-                  <label className="block mb-2 font-medium">Name</label>
-                  <input
-                    type="text"
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                      errors.name ? "border-red-500" : "border-gray-300"
-                    }`}
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <label className="block mb-2 font-medium">Email</label>
-                  <input
-                    type="email"
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    }`}
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-              </div>
-              {/* Second row: Date of Birth */}
-              <label className="block mb-2 font-medium">Date of Birth</label>
-              <input
-                type="date"
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                  errors.dob ? "border-red-500" : "border-gray-300"
-                }`}
-                value={form.dob}
-                onChange={(e) => setForm({ ...form, dob: e.target.value })}
-              />
-              {errors.dob && (
-                <p className="text-red-500 text-sm mt-1">{errors.dob}</p>
-              )}
-              {/* Third row: Password and Confirm Password side by side, stack on mobile */}
-              <div className="flex flex-col md:flex-row gap-4 mt-4 mb-4">
-                <div className="flex-1">
-                  <label className="block mb-2 font-medium">Password</label>
-                  <div className="relative">
+    <>
+      <div className="min-h-screen w-full bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] flex flex-col items-center justify-center py-12">
+        {!isUser && (
+          <div className="w-full max-w-xl bg-white dark:bg-gray-900 p-12 rounded-xl shadow-lg overflow-hidden text-gray-900 dark:text-gray-200">
+            <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb] dark:text-[#60a5fa]">
+              Sign Up
+            </h2>
+            <form autoComplete="off" className="flex flex-col gap-4">
+              <div
+                key={step}
+                className={`transition-all duration-500 ${getAnimationClass()}`}
+              >
+                {step === 1 && (
+                  <div>
+                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                      <div className="flex-1">
+                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                            errors.name
+                              ? "border-red-500 dark:border-red-500"
+                              : "border-gray-300 dark:border-gray-700"
+                          }`}
+                          value={form.name}
+                          onChange={(e) =>
+                            setForm({ ...form, name: e.target.value })
+                          }
+                        />
+                        {errors.name && (
+                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                            {errors.name}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                            errors.email
+                              ? "border-red-500 dark:border-red-500"
+                              : "border-gray-300 dark:border-gray-700"
+                          }`}
+                          value={form.email}
+                          onChange={(e) =>
+                            setForm({ ...form, email: e.target.value })
+                          }
+                        />
+                        {errors.email && (
+                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                            {errors.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                      Date of Birth
+                    </label>
                     <input
-                      type={showPassword ? "text" : "password"}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                        errors.password ? "border-red-500" : "border-gray-300"
+                      type="date"
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                        errors.dob
+                          ? "border-red-500 dark:border-red-500"
+                          : "border-gray-300 dark:border-gray-700"
                       }`}
-                      value={form.password}
+                      value={form.dob}
                       onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
+                        setForm({ ...form, dob: e.target.value })
                       }
                     />
-                    <span
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
-                      onClick={() => setShowPassword((prev) => !prev)}
+                    {errors.dob && (
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                        {errors.dob}
+                      </p>
+                    )}
+                    <div className="flex flex-col md:flex-row gap-4 mt-4 mb-4">
+                      <div className="flex-1">
+                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                              errors.password
+                                ? "border-red-500 dark:border-red-500"
+                                : "border-gray-300 dark:border-gray-700"
+                            }`}
+                            value={form.password}
+                            onChange={(e) =>
+                              setForm({ ...form, password: e.target.value })
+                            }
+                          />
+                          <span
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 dark:text-gray-300"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                          >
+                            {showPassword ? <FaEye /> : <FaEyeSlash />}
+                          </span>
+                        </div>
+                        {errors.password && (
+                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                            {errors.password}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                          Confirm Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                              errors.confirmPassword
+                                ? "border-red-500 dark:border-red-500"
+                                : "border-gray-300 dark:border-gray-700"
+                            }`}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                          />
+                          <span
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 dark:text-gray-300"
+                            onClick={() =>
+                              setShowConfirmPassword((prev) => !prev)
+                            }
+                          >
+                            {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+                          </span>
+                        </div>
+                        {errors.confirmPassword && (
+                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                            {errors.confirmPassword}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-start mb-4">
+                      <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                        Profile Pic
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="w-full dark:text-gray-200"
+                        onChange={handleProfilePic}
+                      />
+                      {form.profilePic && (
+                        <div className="mt-2 flex justify-center">
+                          <img
+                            src={form.profilePic}
+                            alt="Profile Preview"
+                            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                      disabled={isLoading}
                     >
-                      {showPassword ? <FaEye /> : <FaEyeSlash />}
-                    </span>
+                      {isLoading ? "Signing Up..." : "Sign Up"}
+                    </button>
                   </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <label className="block mb-2 font-medium">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                        errors.confirmPassword
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <span
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
-                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                )}
+                {step === 2 && (
+                  <div>
+                    <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                      Enter OTP
+                    </label>
+                    <div className="flex gap-2 mb-2">
+                      {form.otp.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          id={`otp-${idx}`}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          className={`w-12 h-12 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                            errors.otp
+                              ? "border-red-500 dark:border-red-500"
+                              : "border-gray-300 dark:border-gray-700"
+                          }`}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        />
+                      ))}
+                    </div>
+                    {(errors.otp || authError) && (
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                        {errors.otp || authError}
+                      </p>
+                    )}
+                    {otpResent && (
+                      <p className="text-green-600 dark:text-green-400 text-sm mt-1">
+                        {otpResent}
+                      </p>
+                    )}
+                    <div className="flex justify-between mt-6">
+                      <button
+                        type="button"
+                        onClick={handlePrev}
+                        className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] dark:text-[#60a5fa] dark:border-[#60a5fa] font-semibold hover:bg-[#e0e7ff] dark:hover:bg-gray-800 transition"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSubmit}
+                        className="px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        disabled={finalLoading}
+                      >
+                        {finalLoading
+                          ? "Submiting.."
+                          : "Verify & Complete Signup"}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] dark:text-[#60a5fa] dark:border-[#60a5fa] font-semibold hover:bg-[#e0e7ff] dark:hover:bg-gray-800 transition"
                     >
-                      {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
-                    </span>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {/* Profile Pic upload and preview, responsive image */}
-              <div className="flex flex-col items-start mb-4">
-                <label className="block mb-2 font-medium">Profile Pic</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="w-full"
-                  onChange={handleProfilePic}
-                />
-                {form.profilePic && (
-                  <div className="mt-2 flex justify-center">
-                    <img
-                      src={form.profilePic}
-                      alt="Profile Preview"
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200"
-                    />
+                      Resend OTP
+                    </button>
                   </div>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={handleSendOtp}
-                className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={isLoading}
-              >
-                {isLoading ? "Signing Up..." : "Sign Up"}
-              </button>
-            </div>
-          )}
-          {step === 2 && (
-            <div>
-              <label className="block mb-2 font-medium">Enter OTP</label>
-              <div className="flex gap-2 mb-2">
-                {form.otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    id={`otp-${idx}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    className={`w-12 h-12 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
-                      errors.otp ? "border-red-500" : "border-gray-300"
-                    }`}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  />
-                ))}
-              </div>
-              {(errors.otp || authError) && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.otp || authError}
-                </p>
-              )}
-              {otpResent && (
-                <p className="text-green-600 text-sm mt-1">{otpResent}</p>
-              )}
-              <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
-                  disabled={finalLoading}
-                >
-                  {finalLoading ? "Submiting.." : "Verify & Complete Signup"}
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
-              >
-                Resend OTP
-              </button>
-            </div>
-          )}
-        </div>
-        {/* Removed the success message below */}
-      </form>
-    </div>
+            </form>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -36,7 +36,7 @@ export default function RootLayout({
               {/* Fixed Sidebar */}
               <Slidebar />
               {/* Main content with left margin = sidebar width */}
-              <div className="ml-0 lg:ml-72 w-full min-h-screen  p-6">
+              <div className="ml-0 lg:ml-72 w-full min-h-screen">
                 {children}
               </div>
             </ToastProvider>
