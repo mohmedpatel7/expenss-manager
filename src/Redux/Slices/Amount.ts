@@ -38,6 +38,32 @@ export const updateAmount = createAsyncThunk(
   }
 );
 
+// Thunk for fetching current user's credit account
+export const fetchCreditAccount = createAsyncThunk(
+  "amount/fetchCreditAccount",
+  async (usertoken: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/creadit", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          usertoken,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch account");
+      }
+      return data.account;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || "Network error");
+      }
+      return rejectWithValue("Network error");
+    }
+  }
+);
+
 // State interface
 interface AmountState {
   account: null;
@@ -84,6 +110,19 @@ const amountSlice = createSlice({
           (action.payload as { message?: string })?.message ||
           "Failed to update amount";
         state.successMessage = null;
+      })
+      .addCase(fetchCreditAccount.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchCreditAccount.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.account = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchCreditAccount.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as string) || "Failed to fetch account";
       });
   },
 });

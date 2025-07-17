@@ -119,6 +119,32 @@ export const SigninUser = createAsyncThunk(
   }
 );
 
+// Thunk to fetch current user's profile
+export const fetchUserProfile = createAsyncThunk(
+  "auth/fetchUserProfile",
+  async (usertoken: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          usertoken,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to fetch user profile");
+      }
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || "Network error");
+      }
+      return rejectWithValue("Network error");
+    }
+  }
+);
+
 // Interface for the authentication slice state
 interface DataInterface {
   sendOtpState: { message: string } | null; // State for OTP response
@@ -126,6 +152,14 @@ interface DataInterface {
   error: string | null; // Error message if any
   signupState?: { usertoken: string } | null; // State for signup response
   signinState?: { usertoken: string } | null; // State for signin response
+  userProfile?: {
+    _id: string;
+    name: string;
+    email: string;
+    pic?: string;
+    dob?: string;
+    creadit?: { currentCredit: number } | null;
+  } | null;
 }
 
 // Initial state for the authentication slice
@@ -135,6 +169,7 @@ const initialState: DataInterface = {
   error: null,
   signupState: null,
   signinState: null,
+  userProfile: null,
 };
 
 const authSlice = createSlice({
@@ -204,6 +239,22 @@ const authSlice = createSlice({
         state.error =
           (action.payload as { message?: string })?.message ||
           "Something went wrong";
+      })
+      // Fetch user profile cases
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userProfile = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.userProfile = null;
+        state.error =
+          (action.payload as string) || "Failed to fetch user profile";
       });
   },
 });

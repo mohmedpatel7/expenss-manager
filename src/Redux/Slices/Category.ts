@@ -54,6 +54,33 @@ export const postExpense = createAsyncThunk<
   }
 );
 
+// Thunk for fetching current user's expense categories
+export const fetchExpenseCategories = createAsyncThunk<
+  ExpenseCategory[],
+  string,
+  { rejectValue: string }
+>("category/fetchExpenseCategories", async (usertoken, { rejectWithValue }) => {
+  try {
+    const response = await fetch("/api/expenss", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        usertoken,
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return rejectWithValue(data.message || "Failed to fetch categories");
+    }
+    return data.expenss;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return rejectWithValue(error.message);
+    }
+    return rejectWithValue("Network error");
+  }
+});
+
 interface CategoryState {
   loading: boolean;
   error: string | null;
@@ -88,6 +115,22 @@ const categorySlice = createSlice({
       .addCase(postExpense.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(fetchExpenseCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchExpenseCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        // Optionally, you can store all categories in a new state property
+        // For now, just store the first category as before
+        state.expense = action.payload[0] || null;
+        state.error = null;
+      })
+      .addCase(fetchExpenseCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as string) || "Failed to fetch categories";
       });
   },
 });
