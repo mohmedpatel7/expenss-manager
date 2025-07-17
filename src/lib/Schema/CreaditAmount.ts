@@ -14,6 +14,7 @@ const creditAccountSchema = new mongoose.Schema(
         type: { type: String, enum: ["credit", "debit"], required: true },
         amount: { type: Number, required: true },
         date: { type: Date, default: Date.now },
+        currentAmount: { type: Number, required: true },
       },
     ],
   },

@@ -72,7 +72,11 @@ export async function POST(req: NextRequest) {
       if (newCredit < 0) newCredit = 0;
     }
     account.currentCredit = newCredit;
-    account.history.push({ type, amount: currentCredit });
+    account.history.push({
+      type,
+      amount: currentCredit,
+      currentAmount: newCredit,
+    });
     await account.save();
 
     await transporter.sendMail({
@@ -125,6 +129,41 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "Credit updated", account });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Internal server error", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectDB();
+
+    const token = req.headers.get("usertoken");
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    let decoded: JwtPayload;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SIGN!) as JwtPayload;
+    } catch {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = decoded.id;
+
+    const account = await CreditAccount.findOne({ userId });
+    if (!account) {
+      return NextResponse.json(
+        { message: "Credit account not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ account }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error", error: (error as Error).message },

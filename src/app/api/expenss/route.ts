@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       amount,
       type: "debit",
       date: new Date(),
+      currentAmount: creditAccount.currentCredit - amount,
     });
 
     await expenseCategory.save();
@@ -101,6 +102,7 @@ export async function POST(req: NextRequest) {
       type: "debit",
       amount,
       date: new Date(),
+      currentAmount: creditAccount.currentCredit,
     });
     await creditAccount.save();
 
@@ -153,6 +155,35 @@ export async function POST(req: NextRequest) {
       expense: expenseCategory,
       remainingCredit: creditAccount.currentCredit,
     });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Internal server error", error: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectDB();
+
+    const token = req.headers.get("usertoken");
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    let decoded: JwtPayload;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SIGN!) as JwtPayload;
+    } catch {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = decoded.id;
+
+    const result = await Expenss.find({ userId });
+
+    return NextResponse.json({ status: 200, expenss: result });
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error", error: (error as Error).message },
