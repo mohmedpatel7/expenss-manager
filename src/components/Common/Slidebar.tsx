@@ -2,13 +2,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/Redux/store/store";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { FaChevronUp } from "react-icons/fa";
 import { useToast } from "../Common/Toast";
 
 const navItems = [
   {
-    label: "Dashboard",
+    label: "Home",
     icon: (active: boolean) => (
       <svg
         className="w-5 h-5"
@@ -20,7 +20,48 @@ const navItems = [
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"
+          d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-6 0h6"
+        />
+      </svg>
+    ),
+    href: "/",
+  },
+  {
+    label: "Dashboard",
+    icon: (active: boolean) => (
+      <svg
+        className="w-5 h-5"
+        fill="none"
+        stroke={active ? "#2563eb" : "#b0b8c1"}
+        strokeWidth="2.2"
+        viewBox="0 0 24 24"
+      >
+        <rect
+          x="3"
+          y="13"
+          width="4"
+          height="8"
+          rx="1"
+          stroke="currentColor"
+          strokeWidth="2.2"
+        />
+        <rect
+          x="9.5"
+          y="9"
+          width="4"
+          height="12"
+          rx="1"
+          stroke="currentColor"
+          strokeWidth="2.2"
+        />
+        <rect
+          x="16"
+          y="5"
+          width="4"
+          height="16"
+          rx="1"
+          stroke="currentColor"
+          strokeWidth="2.2"
         />
       </svg>
     ),
@@ -50,12 +91,14 @@ const navItems = [
 const Slidebar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // For demo, Dashboard is active
-  const active = "Dashboard";
+  // For demo, Home is active by default
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Determine active nav item based on current path
+  const active = navItems.find((item) => item.href === pathname)?.label || "";
   const [showDropup, setShowDropup] = useState(false);
   const dropupRef = useRef<HTMLDivElement>(null);
-
-  const router = useRouter();
 
   const { showToast } = useToast();
 
@@ -187,14 +230,18 @@ const Slidebar: React.FC = () => {
                   }
                 `}
                 onClick={() => {
-                  const token =
-                    typeof window !== "undefined"
-                      ? localStorage.getItem("usertoken")
-                      : null;
-                  if (!token) {
-                    router.push("/signin");
+                  if (item.href === "/") {
+                    router.push("/");
                   } else {
-                    router.push(item.href);
+                    const token =
+                      typeof window !== "undefined"
+                        ? localStorage.getItem("usertoken")
+                        : null;
+                    if (!token) {
+                      router.push("/signin");
+                    } else {
+                      router.push(item.href);
+                    }
                   }
                   if (open) setOpen(false);
                 }}
@@ -231,7 +278,9 @@ const Slidebar: React.FC = () => {
               >
                 <FaChevronUp
                   className={`transition-transform ${
-                    showDropup ? "rotate-180" : "rotate-0"
+                    showDropup
+                      ? "rotate-180 text-[#2563eb]"
+                      : "rotate-0 text-[#83949b]"
                   }`}
                 />
               </button>
@@ -252,6 +301,7 @@ const Slidebar: React.FC = () => {
                       localStorage.removeItem("usertoken");
                       window.location.reload();
                       showToast("Sign out success!", "error");
+                      router.push("/");
                     }}
                   >
                     Sign Out

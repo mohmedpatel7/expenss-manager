@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/Redux/store/store";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useToast } from "../Common/Toast";
+import { useRouter } from "next/navigation";
 
 const Signup: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -31,6 +32,8 @@ const Signup: React.FC = () => {
   const { showToast } = useToast();
 
   const isUser = localStorage.getItem("usertoken");
+
+  const router = useRouter();
 
   // Handle OTP input
   const handleOtpChange = (index: number, value: string) => {
@@ -136,6 +139,7 @@ const Signup: React.FC = () => {
       setErrors({});
       if (result?.message) showToast(result.message || "", "success");
       else showToast("Signup successful! You can now log in.", "success");
+      router.push("/dashboard");
     } catch (err: unknown) {
       if ((err as { message?: string })?.message)
         showToast((err as { message?: string }).message || "", "error");
@@ -161,8 +165,8 @@ const Signup: React.FC = () => {
     <>
       <div className="min-h-screen w-full bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] flex flex-col items-center justify-center py-12">
         {!isUser && (
-          <div className="w-full max-w-xl bg-white dark:bg-gray-900 p-12 rounded-xl shadow-lg overflow-hidden text-gray-900 dark:text-gray-200">
-            <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb] dark:text-[#60a5fa]">
+          <div className="w-full max-w-xl bg-white p-12 rounded-xl shadow-lg overflow-hidden text-gray-900">
+            <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb]">
               Sign Up
             </h2>
             <form autoComplete="off" className="flex flex-col gap-4">
@@ -174,15 +178,13 @@ const Signup: React.FC = () => {
                   <div>
                     <div className="flex flex-col md:flex-row gap-4 mb-4">
                       <div className="flex-1">
-                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                        <label className="block mb-2 font-medium text-gray-800">
                           Name
                         </label>
                         <input
                           type="text"
-                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
-                            errors.name
-                              ? "border-red-500 dark:border-red-500"
-                              : "border-gray-300 dark:border-gray-700"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
+                            errors.name ? "border-red-500" : "border-gray-300"
                           }`}
                           value={form.name}
                           onChange={(e) =>
@@ -190,21 +192,19 @@ const Signup: React.FC = () => {
                           }
                         />
                         {errors.name && (
-                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                          <p className="text-red-500 text-sm mt-1">
                             {errors.name}
                           </p>
                         )}
                       </div>
                       <div className="flex-1">
-                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                        <label className="block mb-2 font-medium text-gray-800">
                           Email
                         </label>
                         <input
                           type="email"
-                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
-                            errors.email
-                              ? "border-red-500 dark:border-red-500"
-                              : "border-gray-300 dark:border-gray-700"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
+                            errors.email ? "border-red-500" : "border-gray-300"
                           }`}
                           value={form.email}
                           onChange={(e) =>
@@ -212,21 +212,19 @@ const Signup: React.FC = () => {
                           }
                         />
                         {errors.email && (
-                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                          <p className="text-red-500 text-sm mt-1">
                             {errors.email}
                           </p>
                         )}
                       </div>
                     </div>
-                    <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                    <label className="block mb-2 font-medium text-gray-800">
                       Date of Birth
                     </label>
                     <input
                       type="date"
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
-                        errors.dob
-                          ? "border-red-500 dark:border-red-500"
-                          : "border-gray-300 dark:border-gray-700"
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
+                        errors.dob ? "border-red-500" : "border-gray-300"
                       }`}
                       value={form.dob}
                       onChange={(e) =>
@@ -234,22 +232,20 @@ const Signup: React.FC = () => {
                       }
                     />
                     {errors.dob && (
-                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
-                        {errors.dob}
-                      </p>
+                      <p className="text-red-500 text-sm mt-1">{errors.dob}</p>
                     )}
                     <div className="flex flex-col md:flex-row gap-4 mt-4 mb-4">
                       <div className="flex-1">
-                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                        <label className="block mb-2 font-medium text-gray-800">
                           Password
                         </label>
                         <div className="relative">
                           <input
                             type={showPassword ? "text" : "password"}
-                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
                               errors.password
-                                ? "border-red-500 dark:border-red-500"
-                                : "border-gray-300 dark:border-gray-700"
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             value={form.password}
                             onChange={(e) =>
@@ -257,35 +253,35 @@ const Signup: React.FC = () => {
                             }
                           />
                           <span
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 dark:text-gray-300"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
                             onClick={() => setShowPassword((prev) => !prev)}
                           >
                             {showPassword ? <FaEye /> : <FaEyeSlash />}
                           </span>
                         </div>
                         {errors.password && (
-                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                          <p className="text-red-500 text-sm mt-1">
                             {errors.password}
                           </p>
                         )}
                       </div>
                       <div className="flex-1">
-                        <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                        <label className="block mb-2 font-medium text-gray-800">
                           Confirm Password
                         </label>
                         <div className="relative">
                           <input
                             type={showConfirmPassword ? "text" : "password"}
-                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
+                            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
                               errors.confirmPassword
-                                ? "border-red-500 dark:border-red-500"
-                                : "border-gray-300 dark:border-gray-700"
+                                ? "border-red-500"
+                                : "border-gray-300"
                             }`}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                           />
                           <span
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 dark:text-gray-300"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
                             onClick={() =>
                               setShowConfirmPassword((prev) => !prev)
                             }
@@ -294,20 +290,20 @@ const Signup: React.FC = () => {
                           </span>
                         </div>
                         {errors.confirmPassword && (
-                          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                          <p className="text-red-500 text-sm mt-1">
                             {errors.confirmPassword}
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="flex flex-col items-start mb-4">
-                      <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                      <label className="block mb-2 font-medium text-gray-800">
                         Profile Pic
                       </label>
                       <input
                         type="file"
                         accept="image/*"
-                        className="w-full dark:text-gray-200"
+                        className="w-full"
                         onChange={handleProfilePic}
                       />
                       {form.profilePic && (
@@ -315,7 +311,7 @@ const Signup: React.FC = () => {
                           <img
                             src={form.profilePic}
                             alt="Profile Preview"
-                            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200"
                           />
                         </div>
                       )}
@@ -332,7 +328,7 @@ const Signup: React.FC = () => {
                 )}
                 {step === 2 && (
                   <div>
-                    <label className="block mb-2 font-medium text-gray-800 dark:text-gray-200">
+                    <label className="block mb-2 font-medium text-gray-800">
                       Enter OTP
                     </label>
                     <div className="flex gap-2 mb-2">
@@ -343,10 +339,8 @@ const Signup: React.FC = () => {
                           type="text"
                           inputMode="numeric"
                           maxLength={1}
-                          className={`w-12 h-12 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:placeholder-gray-400 ${
-                            errors.otp
-                              ? "border-red-500 dark:border-red-500"
-                              : "border-gray-300 dark:border-gray-700"
+                          className={`w-12 h-12 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
+                            errors.otp ? "border-red-500" : "border-gray-300"
                           }`}
                           value={digit}
                           onChange={(e) => handleOtpChange(idx, e.target.value)}
@@ -354,20 +348,18 @@ const Signup: React.FC = () => {
                       ))}
                     </div>
                     {(errors.otp || authError) && (
-                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                      <p className="text-red-500 text-sm mt-1">
                         {errors.otp || authError}
                       </p>
                     )}
                     {otpResent && (
-                      <p className="text-green-600 dark:text-green-400 text-sm mt-1">
-                        {otpResent}
-                      </p>
+                      <p className="text-green-600 text-sm mt-1">{otpResent}</p>
                     )}
                     <div className="flex justify-between mt-6">
                       <button
                         type="button"
                         onClick={handlePrev}
-                        className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] dark:text-[#60a5fa] dark:border-[#60a5fa] font-semibold hover:bg-[#e0e7ff] dark:hover:bg-gray-800 transition"
+                        className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
                       >
                         Back
                       </button>
@@ -385,7 +377,7 @@ const Signup: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleResendOtp}
-                      className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] dark:text-[#60a5fa] dark:border-[#60a5fa] font-semibold hover:bg-[#e0e7ff] dark:hover:bg-gray-800 transition"
+                      className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
                     >
                       Resend OTP
                     </button>
