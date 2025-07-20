@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    const amount = await CreaditAmount.findById(userId).select("currentCredit");
+    const amount = await CreaditAmount.findOne({ userId }).select(
+      "currentCredit"
+    );
 
     return NextResponse.json({
       _id: user._id,

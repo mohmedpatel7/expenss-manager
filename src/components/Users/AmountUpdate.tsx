@@ -1,5 +1,11 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { updateAmount } from "@/Redux/Slices/Amount";
+import { fetchUserProfile } from "@/Redux/Slices/AuthSlices";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/Redux/store/store";
+import { useToast } from "../Common/Toast";
+import { fetchCreditAccount } from "@/Redux/Slices/Amount";
 
 interface AmountUpdateModalProps {
   open: boolean;
@@ -12,8 +18,15 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [amount, setAmount] = useState("");
+  const [type, setType] = useState("credit");
+  const [loading, setLoading] = useState(false);
 
-  const isUser = localStorage.getItem("usertoken");
+  const isUser =
+    typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { showToast } = useToast();
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -40,8 +53,52 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
   };
 
   // Close modal on form submit (Update button)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isUser) return;
+    setLoading(true);
+    try {
+      const resultAction = await dispatch(
+        updateAmount({
+          currentCredit: Number(amount),
+          type,
+          usertoken: isUser,
+        })
+      );
+      const payload = resultAction.payload;
+      if (resultAction.meta.requestStatus === "fulfilled") {
+        if (type === "credit") {
+          showToast(
+            payload?.message || "Amount credited successfully",
+            "success"
+          );
+        } else if (type === "debit") {
+          showToast(
+            payload?.message || "Amount debited successfully",
+            "success"
+          );
+        } else {
+          showToast(
+            payload?.message || "Amount updated successfully",
+            "success"
+          );
+        }
+        if (isUser) {
+          dispatch(fetchUserProfile(isUser));
+          dispatch(fetchCreditAccount(isUser));
+        }
+      } else {
+        showToast(payload?.message || "Failed to update amount", "error");
+      }
+      setLoading(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        showToast(error.message || "Failed to update amount", "error");
+      } else {
+        showToast("Failed to update amount", "error");
+      }
+      setLoading(false);
+    }
     onClose();
   };
 
@@ -97,6 +154,8 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
                 <select
                   id="type"
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
                 >
                   <option value="credit">Credit</option>
                   <option value="debit">Debit</option>
@@ -105,9 +164,9 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
               <button
                 type="submit"
                 className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={!isAmountValid}
+                disabled={!isAmountValid || loading}
               >
-                Update
+                {loading ? "Updating..." : "Update"}
               </button>
             </form>
           </div>

@@ -130,6 +130,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Credit updated", account });
   } catch (error) {
+    if (error instanceof Error) {
+      console.error("[POST /api/creadit] Error:", error.stack || error.message);
+    } else {
+      console.error("[POST /api/creadit] Unknown error:", error);
+    }
     return NextResponse.json(
       { message: "Internal server error", error: (error as Error).message },
       { status: 500 }
@@ -162,6 +167,12 @@ export async function GET(req: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Sort the history array by date descending (most recent first)
+    account.history = account.history.sort(
+      (a: { date: string | Date }, b: { date: string | Date }) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
 
     return NextResponse.json({ account }, { status: 200 });
   } catch (error) {
