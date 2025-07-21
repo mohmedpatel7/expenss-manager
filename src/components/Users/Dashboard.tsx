@@ -7,6 +7,27 @@ import { fetchCreditAccount } from "@/Redux/Slices/Amount";
 import type { AppDispatch } from "@/Redux/store/store";
 import type { RootState } from "@/Redux/store/store";
 import Image from "next/image";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Define a type for userProfile
 interface UserProfile {
@@ -52,26 +73,23 @@ const UserInfo = React.memo(({ userProfile }: { userProfile: UserProfile }) => (
 UserInfo.displayName = "UserInfo";
 
 const AmountSection = React.memo(
-  ({
-    currentAmount,
-    onUpdate,
-  }: {
-    currentAmount: number;
-    onUpdate: () => void;
-  }) => (
-    <div className="flex flex-col items-center md:items-end w-full md:w-auto">
-      <span className="text-lg text-gray-500 font-medium">Current Amount</span>
-      <span className="text-4xl font-extrabold text-green-600 mt-1">
-        ₹{currentAmount?.toLocaleString() || 0}
-      </span>
-      {/* <button
-        className="mt-4 px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition"
-        onClick={onUpdate}
-      >
-        Update Amount
-      </button>  */}
-    </div>
-  )
+  ({ currentAmount }: { currentAmount: number }) => {
+    const isLow = currentAmount < 1000;
+    return (
+      <div className="flex flex-col items-center md:items-end w-full md:w-auto">
+        <span className="text-lg text-gray-500 font-medium">
+          Current Amount
+        </span>
+        <span
+          className={`text-4xl font-extrabold mt-1 ${
+            isLow ? "text-red-500" : "text-green-600"
+          }`}
+        >
+          ₹{currentAmount?.toLocaleString() || 0}
+        </span>
+      </div>
+    );
+  }
 );
 AmountSection.displayName = "AmountSection";
 
@@ -155,6 +173,11 @@ Transactions.displayName = "Transactions";
 
 const Dashboard: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [filterType, setFilterType] = useState<"all" | "credit" | "debit">(
+    "all"
+  );
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const dispatch = useDispatch<AppDispatch>();
   const userProfile = useSelector(
     (state: RootState) => state.auth.userProfile,
@@ -173,6 +196,132 @@ const Dashboard: React.FC = () => {
     usertoken = localStorage.getItem("usertoken");
     isUser = !!usertoken;
   }
+
+  // Filter transactions based on filterType and date range
+  const filteredTransactions = useMemo(() => {
+    return (creditAccount?.history || []).filter((txn) => {
+      // Filter by type
+      if (filterType !== "all" && txn.type !== filterType) return false;
+      // Filter by date
+      const txnDate = new Date(txn.date);
+      if (startDate && txnDate < new Date(startDate)) return false;
+      if (endDate && txnDate > new Date(endDate)) return false;
+      return true;
+    });
+  }, [creditAccount?.history, filterType, startDate, endDate]);
+
+  // Prepare data for the balance-over-time line chart
+  const chartData = useMemo(() => {
+    if (!filteredTransactions.length) return null;
+    // Sort by date ascending
+    const sorted = [...filteredTransactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    // Project blue color
+    const lineColor = "#2563eb";
+    const fillColor = "rgba(37,99,235,0.12)"; // blue, very light
+    const pointBg = "#2563eb";
+    const pointHover = "#1d4ed8"; // darker blue
+    return {
+      labels: sorted.map((txn) =>
+        new Date(txn.date).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        })
+      ),
+      datasets: [
+        {
+          label: "Balance",
+          data: sorted.map((txn) => txn.currentAmount),
+          borderColor: lineColor,
+          backgroundColor: fillColor,
+          tension: 0.4,
+          fill: true,
+          pointRadius: 4,
+          pointBackgroundColor: pointBg,
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: pointHover,
+          pointHoverBorderColor: lineColor,
+          borderWidth: 3,
+        },
+      ],
+    };
+  }, [filteredTransactions]);
+
+  // Info card calculations
+  const totalCredits = useMemo(
+    () =>
+      filteredTransactions
+        .filter((t) => t.type === "credit")
+        .reduce((sum, t) => sum + t.amount, 0),
+    [filteredTransactions]
+  );
+  const totalDebits = useMemo(
+    () =>
+      filteredTransactions
+        .filter((t) => t.type === "debit")
+        .reduce((sum, t) => sum + t.amount, 0),
+    [filteredTransactions]
+  );
+  const numTransactions = filteredTransactions.length;
+  const biggestCredit = useMemo(
+    () =>
+      Math.max(
+        0,
+        ...filteredTransactions
+          .filter((t) => t.type === "credit")
+          .map((t) => t.amount)
+      ),
+    [filteredTransactions]
+  );
+  const biggestDebit = useMemo(
+    () =>
+      Math.max(
+        0,
+        ...filteredTransactions
+          .filter((t) => t.type === "debit")
+          .map((t) => t.amount)
+      ),
+    [filteredTransactions]
+  );
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top" as const,
+        labels: {
+          color: "#2563eb",
+          font: { weight: "bold" as const, size: 14 },
+        },
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        mode: "index" as const,
+        intersect: false,
+        backgroundColor: "#fff",
+        titleColor: "#2563eb",
+        bodyColor: "#333",
+        borderColor: "#2563eb",
+        borderWidth: 1,
+        titleFont: { weight: "bold" as const, size: 16 },
+        bodyFont: { size: 14 },
+      },
+    },
+    scales: {
+      x: {
+        ticks: { color: "#2563eb", font: { weight: "bold" as const } },
+        grid: { color: "rgba(37,99,235,0.08)" },
+      },
+      y: {
+        ticks: { color: "#2563eb", font: { weight: "bold" as const } },
+        grid: { color: "rgba(37,99,235,0.08)" },
+      },
+    },
+  };
 
   useEffect(() => {
     if (isUser && usertoken) {
@@ -215,10 +364,88 @@ const Dashboard: React.FC = () => {
         <div className="w-full max-w-5xl mt-10 px-4 md:px-0">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10 bg-white rounded-2xl shadow-xl p-8">
             <UserInfo userProfile={userProfile} />
-            <AmountSection
-              currentAmount={creditAccount?.currentCredit || 0}
-              onUpdate={() => setModalOpen(true)}
-            />
+            <AmountSection currentAmount={creditAccount?.currentCredit || 0} />
+          </div>
+        </div>
+
+        {/* Filter Controls */}
+        <div className="w-full max-w-5xl px-4 md:px-0 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h4 className="text-lg font-semibold text-black mb-4">
+              Filter Transactions
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+              {/* Filter by Type */}
+              <div>
+                <label
+                  htmlFor="filterType"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  Type
+                </label>
+                <select
+                  id="filterType"
+                  value={filterType}
+                  onChange={(e) =>
+                    setFilterType(e.target.value as "all" | "credit" | "debit")
+                  }
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition text-black"
+                >
+                  <option value="all">All</option>
+                  <option value="credit">Credit</option>
+                  <option value="debit">Debit</option>
+                </select>
+              </div>
+
+              {/* Filter by Start Date */}
+              <div>
+                <label
+                  htmlFor="startDate"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  From
+                </label>
+                <input
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition text-black"
+                />
+              </div>
+
+              {/* Filter by End Date */}
+              <div>
+                <label
+                  htmlFor="endDate"
+                  className="block text-sm font-medium text-black mb-1"
+                >
+                  To
+                </label>
+                <input
+                  id="endDate"
+                  type="date"
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] transition text-black"
+                />
+              </div>
+
+              {/* Clear Button */}
+              {(startDate || endDate || filterType !== "all") && (
+                <div className="flex items-end h-full">
+                  <button
+                    className="w-full px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-black font-medium transition"
+                    onClick={() => {
+                      setFilterType("all");
+                      setStartDate("");
+                      setEndDate("");
+                    }}
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -227,22 +454,140 @@ const Dashboard: React.FC = () => {
           <h3 className="text-2xl font-bold text-[#2563eb] mb-4 font-sans">
             Latest Transactions
           </h3>
-          <Transactions transactions={creditAccount?.history || []} />
+          <Transactions transactions={filteredTransactions} />
         </div>
 
         {/* Graph Placeholder */}
         <div className="w-full max-w-5xl px-4 md:px-0 mb-20">
-          <div className="bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] rounded-2xl p-8 shadow flex flex-col items-center justify-center min-h-[240px]">
-            <span className="text-white text-2xl font-bold mb-3 font-sans">
+          <div className="bg-white rounded-2xl p-8 shadow flex flex-col items-center justify-center min-h-[240px]">
+            <span className="text-[#2563eb] text-2xl font-bold mb-3 font-sans">
               Spending & Credit Overview
             </span>
-            <div className="w-full h-36 flex items-center justify-center">
-              {/* Replace this with a real chart/graph later */}
-              <span className="text-white/80 italic text-lg font-sans">
-                [Graph will appear here]
+            <div className="w-full h-64 flex items-center justify-center">
+              {chartData ? (
+                <Line data={chartData} options={chartOptions} />
+              ) : (
+                <span className="text-[#2563eb]/80 italic text-lg font-sans">
+                  No transaction data to display graph.
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Info Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-8">
+            <div className="bg-white border-l-4 border-green-500 rounded-xl shadow p-5 flex flex-col items-center">
+              <span className="text-sm text-gray-500 font-medium mb-1">
+                Total Credits
+              </span>
+              <span className="text-2xl font-bold text-green-600">
+                ₹{totalCredits.toLocaleString()}
+              </span>
+            </div>
+            <div className="bg-white border-l-4 border-red-500 rounded-xl shadow p-5 flex flex-col items-center">
+              <span className="text-sm text-gray-500 font-medium mb-1">
+                Total Debits
+              </span>
+              <span className="text-2xl font-bold text-red-500">
+                ₹{totalDebits.toLocaleString()}
+              </span>
+            </div>
+            <div className="bg-white border-l-4 border-[#2563eb] rounded-xl shadow p-5 flex flex-col items-center">
+              <span className="text-sm text-gray-500 font-medium mb-1">
+                Transactions
+              </span>
+              <span className="text-2xl font-bold text-[#2563eb]">
+                {numTransactions}
+              </span>
+            </div>
+            <div className="bg-white border-l-4 border-green-400 rounded-xl shadow p-5 flex flex-col items-center">
+              <span className="text-sm text-gray-500 font-medium mb-1">
+                Biggest Credit
+              </span>
+              <span className="text-2xl font-bold text-green-600">
+                ₹{biggestCredit.toLocaleString()}
+              </span>
+            </div>
+            <div className="bg-white border-l-4 border-red-400 rounded-xl shadow p-5 flex flex-col items-center">
+              <span className="text-sm text-gray-500 font-medium mb-1">
+                Biggest Debit
+              </span>
+              <span className="text-2xl font-bold text-red-500">
+                ₹{biggestDebit.toLocaleString()}
               </span>
             </div>
           </div>
+        </div>
+        {/* Smart Suggestion/Info Section */}
+        <div className="w-full flex flex-col items-center mt-8">
+          {(() => {
+            if ((creditAccount?.currentCredit || 0) < 1000) {
+              return (
+                <div className="bg-red-50 border-l-4 border-red-400 rounded-xl shadow p-5 w-full max-w-2xl flex items-center gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <span className="text-red-600 font-bold">
+                      Low Balance Alert:
+                    </span>
+                    <span className="ml-2 text-gray-700">
+                      Your balance is running low. Consider adding funds or
+                      reducing expenses.
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            if (totalDebits > totalCredits && totalDebits > 0) {
+              return (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow p-5 w-full max-w-2xl flex items-center gap-3">
+                  <span className="text-2xl">💸</span>
+                  <div>
+                    <span className="text-yellow-700 font-bold">
+                      High Spending:
+                    </span>
+                    <span className="ml-2 text-gray-700">
+                      You&apos;ve spent more than you&apos;ve credited recently.
+                      Review your expenses for savings opportunities.
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            if (totalCredits > 0 && totalDebits === 0) {
+              return (
+                <div className="bg-blue-50 border-l-4 border-blue-400 rounded-xl shadow p-5 w-full max-w-2xl flex items-center gap-3">
+                  <span className="text-2xl">🎉</span>
+                  <div>
+                    <span className="text-blue-700 font-bold">
+                      Great Start!
+                    </span>
+                    <span className="ml-2 text-gray-700">
+                      You&apos;ve credited your account but haven&apos;t spent
+                      anything yet. Keep it up!
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            if (
+              totalCredits > 0 &&
+              totalDebits > 0 &&
+              totalCredits > totalDebits
+            ) {
+              return (
+                <div className="bg-green-50 border-l-4 border-green-400 rounded-xl shadow p-5 w-full max-w-2xl flex items-center gap-3">
+                  <span className="text-2xl">🌱</span>
+                  <div>
+                    <span className="text-green-700 font-bold">Good Job!</span>
+                    <span className="ml-2 text-gray-700">
+                      You&apos;re saving more than you&apos;re spending. Keep
+                      growing your balance!
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
 
         {/* Floating Action Button for Amount Update */}

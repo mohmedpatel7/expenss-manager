@@ -1,10 +1,13 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/Redux/store/store";
+import type { AppDispatch } from "@/Redux/store/store";
 import { useRouter, usePathname } from "next/navigation";
 import { FaChevronUp } from "react-icons/fa";
 import { useToast } from "../Common/Toast";
+import { fetchUserProfile } from "@/Redux/Slices/AuthSlices";
+import Image from "next/image";
 
 const navItems = [
   {
@@ -91,6 +94,8 @@ const navItems = [
 const Slidebar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const dispatch: AppDispatch = useDispatch();
+  const userProfile = useSelector((state: RootState) => state.auth.userProfile);
   // For demo, Home is active by default
   const router = useRouter();
   const pathname = usePathname();
@@ -119,7 +124,11 @@ const Slidebar: React.FC = () => {
         ? localStorage.getItem("usertoken")
         : null);
     setIsLoggedIn(!!token);
-  }, [signinState, signupState]);
+    // Fetch user profile if token exists and not already loaded
+    if (token && !userProfile) {
+      dispatch(fetchUserProfile(token));
+    }
+  }, [signinState, signupState, dispatch, userProfile]);
 
   useEffect(() => {
     // Close dropup on outside click
@@ -256,15 +265,27 @@ const Slidebar: React.FC = () => {
         <div className="absolute bottom-6 w-full px-8">
           {isLoggedIn ? (
             <div className="flex items-center gap-3 relative">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
-                U
-              </div>
+              {userProfile?.pic ? (
+                <Image
+                  src={userProfile.pic}
+                  alt={userProfile.name}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover border-2 border-[#2563eb]"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
+                  {userProfile?.name
+                    ? userProfile.name.charAt(0).toUpperCase()
+                    : "U"}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-black truncate">
-                  Username
+                  {userProfile?.name || "Username"}
                 </div>
                 <div className="text-xs text-[#83949b] truncate">
-                  user@email.com
+                  {userProfile?.email || "user@email.com"}
                 </div>
               </div>
               {/* Dropup toggle button with arrow */}

@@ -125,6 +125,8 @@ const features = [
 const LandPage: React.FC = () => {
   const router = useRouter();
 
+  const isUser = localStorage.getItem("usertoken");
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] text-gray-900">
       {/* Hero Section */}
@@ -142,12 +144,14 @@ const LandPage: React.FC = () => {
           Take control of your finances. Track, analyze, and optimize your
           spending with beautiful charts and powerful tools.
         </p>
-        <button
-          className="inline-block px-8 py-3 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition text-lg"
-          onClick={() => router.push("/signin")}
-        >
-          Get Started
-        </button>
+        {!isUser && (
+          <button
+            className="inline-block px-8 py-3 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition text-lg"
+            onClick={() => router.push("/signin")}
+          >
+            Get Started
+          </button>
+        )}
       </section>
 
       {/* Features Section */}
