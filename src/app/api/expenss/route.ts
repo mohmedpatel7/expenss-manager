@@ -182,8 +182,38 @@ export async function GET(req: NextRequest) {
     const userId = decoded.id;
 
     const result = await Expenss.find({ userId });
+    if (!result) {
+      return NextResponse.json({ message: "Not found!" }, { status: 404 });
+    }
 
-    return NextResponse.json({ status: 200, expenss: result });
+    // Define a type for category with expenses
+    type CategoryWithExpenses = {
+      _id: string;
+      userId: string;
+      title: string;
+      creditAccountId: string;
+      expenses: { date: string | Date }[];
+      [key: string]: unknown;
+    };
+    const sortedResult = (result as CategoryWithExpenses[])
+      .map((cat) => {
+        if (Array.isArray(cat.expenses)) {
+          cat.expenses = cat.expenses.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+        }
+        return cat;
+      })
+      .sort((a, b) => {
+        const aDate = a.expenses[0]?.date
+          ? new Date(a.expenses[0].date).getTime()
+          : 0;
+        const bDate = b.expenses[0]?.date
+          ? new Date(b.expenses[0].date).getTime()
+          : 0;
+        return bDate - aDate;
+      });
+    return NextResponse.json({ status: 200, expenss: sortedResult });
   } catch (error) {
     return NextResponse.json(
       { message: "Internal server error", error: (error as Error).message },

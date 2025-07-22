@@ -86,6 +86,7 @@ interface CategoryState {
   error: string | null;
   expense: ExpenseCategory | null;
   remainingCredit: number | null;
+  categories: ExpenseCategory[];
 }
 
 const initialState: CategoryState = {
@@ -93,6 +94,7 @@ const initialState: CategoryState = {
   error: null,
   expense: null,
   remainingCredit: null,
+  categories: [],
 };
 
 const categorySlice = createSlice({
@@ -122,8 +124,7 @@ const categorySlice = createSlice({
       })
       .addCase(fetchExpenseCategories.fulfilled, (state, action) => {
         state.loading = false;
-        // Optionally, you can store all categories in a new state property
-        // For now, just store the first category as before
+        state.categories = action.payload;
         state.expense = action.payload[0] || null;
         state.error = null;
       })

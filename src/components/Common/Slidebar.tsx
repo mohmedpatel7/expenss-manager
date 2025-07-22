@@ -87,7 +87,7 @@ const navItems = [
         />
       </svg>
     ),
-    href: "#",
+    href: "/categaries",
   },
 ];
 
@@ -320,7 +320,6 @@ const Slidebar: React.FC = () => {
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg text-red-600"
                     onClick={() => {
                       localStorage.removeItem("usertoken");
-                      window.location.reload();
                       showToast("Sign out success!", "error");
                       router.push("/");
                     }}
