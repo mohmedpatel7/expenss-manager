@@ -1,11 +1,13 @@
 import Signin from "@/components/Users/Signin";
+import Head from "next/head";
 
-function signin() {
+export default function Page() {
   return (
     <>
+      <Head>
+        <title>Sign In | Expenss Manager</title>
+      </Head>
       <Signin />
     </>
   );
 }
-
-export default signin;
