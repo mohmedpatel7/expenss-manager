@@ -1,9 +1,14 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "@/Redux/store/store";
-import { fetchExpenseCategories, postExpense } from "@/Redux/Slices/Category";
+import {
+  fetchExpenseCategories,
+  postExpense,
+  deleteExpenseCategory,
+} from "@/Redux/Slices/Category";
 import { useToast } from "../Common/Toast";
+import { useRouter } from "next/navigation";
 
 // Helper to format date
 function formatDate(date: string | Date) {
@@ -33,6 +38,10 @@ const Categories: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { showToast } = useToast();
   const [category, setCategory] = useState("");
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const { categories, loading, error } = useSelector(
     (state: RootState) => state.category
@@ -72,6 +81,39 @@ const Categories: React.FC = () => {
       }
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!usertoken) return;
+    setDeletingId(id);
+    try {
+      await dispatch(
+        deleteExpenseCategory({ id, userToken: usertoken })
+      ).unwrap();
+      showToast("Category deleted!", "success");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showToast(err.message, "error");
+      } else {
+        showToast("Failed to delete category", "error");
+      }
+    } finally {
+      setDeletingId(null);
+      setMenuOpen(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] flex flex-col items-center py-12 px-4 font-sans">
@@ -125,9 +167,38 @@ const Categories: React.FC = () => {
               return (
                 <div
                   key={cat._id}
-                  className={`border-l-4 rounded-xl shadow p-6 flex flex-col items-center ${color} animate-fade-in`}
+                  className={`border-l-4 rounded-xl shadow p-6 flex flex-col items-center relative ${color} animate-fade-in cursor-pointer`}
                   style={{ animationDelay: `${idx * 0.07 + 0.1}s` }}
+                  onClick={() => router.push(`/categories/${cat._id}`)}
+                  role="button"
+                  tabIndex={0}
+                  ref={menuOpen === cat._id ? menuRef : null}
                 >
+                  {/* Three-dot menu */}
+                  <button
+                    className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-200 z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuOpen(menuOpen === cat._id ? null : cat._id);
+                    }}
+                    aria-label="Open menu"
+                  >
+                    <span className="text-xl">&#8942;</span>
+                  </button>
+                  {menuOpen === cat._id && (
+                    <div className="absolute top-8 right-2 bg-white border rounded shadow-lg z-20 min-w-[120px]">
+                      <button
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-60"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(cat._id);
+                        }}
+                        disabled={deletingId === cat._id}
+                      >
+                        {deletingId === cat._id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  )}
                   <span className="text-lg font-bold mb-1">{cat.title}</span>
                   <span className="text-xs text-gray-500 mt-1">
                     Created:{" "}

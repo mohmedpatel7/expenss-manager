@@ -87,7 +87,7 @@ const navItems = [
         />
       </svg>
     ),
-    href: "/categaries",
+    href: "/categories",
   },
 ];
 
@@ -309,15 +309,11 @@ const Slidebar: React.FC = () => {
               {showDropup && (
                 <div
                   ref={dropupRef}
-                  className="absolute bottom-14 right-0 mb-2 w-44 bg-white rounded-lg shadow-lg border border-gray-100 z-50 animate-fade-in"
+                  className="absolute left-0 right-0 bottom-14 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-fade-in px-6 py-3"
                 >
-                  {/* Arrow */}
-                  <div className="absolute right-4 -top-2 w-4 h-4 overflow-hidden">
-                    <div className="w-4 h-4 bg-white border-l border-t border-gray-100 rotate-45 transform origin-bottom-left shadow-md"></div>
-                  </div>
                   {/* <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg">Profile</button> */}
                   <button
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg text-red-600"
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg text-red-600 font-semibold"
                     onClick={() => {
                       localStorage.removeItem("usertoken");
                       showToast("Sign out success!", "error");

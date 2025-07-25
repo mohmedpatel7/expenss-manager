@@ -118,7 +118,20 @@ export async function PUT(req: NextRequest) {
       from: process.env.EMAIL,
       to: email,
       subject: "otp for expenss manager signup.",
-      text: `Dear User,Your OTP for signup verification is:${otp}. Do not share it with anyone.`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fb; padding: 32px;">
+          <div style="max-width: 420px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px #0001; padding: 32px 24px;">
+            <h2 style="color: #2563eb; margin-bottom: 12px;">Expenss Manager Signup Verification</h2>
+            <p style="font-size: 16px; color: #222; margin-bottom: 24px;">Dear User,</p>
+            <p style="font-size: 15px; color: #444; margin-bottom: 18px;">Your OTP for signup verification is:</p>
+            <div style="font-size: 2.2rem; font-weight: bold; color: #2563eb; letter-spacing: 8px; background: #e0e7ff; padding: 16px 0; border-radius: 8px; text-align: center; margin-bottom: 24px;">${otp}</div>
+            <p style="font-size: 14px; color: #888;">Do not share this OTP with anyone. It is valid for 2 minutes.</p>
+            <div style="margin-top: 32px; text-align: center;">
+              <span style="font-size: 13px; color: #b0b8c1;">Expenss Manager &copy; ${new Date().getFullYear()}</span>
+            </div>
+          </div>
+        </div>
+      `,
     });
     return NextResponse.json({ message: "OTP sent to your email." });
   } catch (error) {
