@@ -125,7 +125,8 @@ const features = [
 const LandPage: React.FC = () => {
   const router = useRouter();
 
-  const isUser = localStorage.getItem("usertoken");
+  const isUser =
+    typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] text-gray-900">

@@ -315,7 +315,9 @@ const Slidebar: React.FC = () => {
                   <button
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg text-red-600 font-semibold"
                     onClick={() => {
-                      localStorage.removeItem("usertoken");
+                      if (typeof window !== "undefined") {
+                        localStorage.removeItem("usertoken");
+                      }
                       showToast("Sign out success!", "error");
                       router.push("/");
                     }}

@@ -193,7 +193,8 @@ const Dashboard: React.FC = () => {
   let isUser = false;
   let usertoken: string | null = null;
   if (typeof window !== "undefined") {
-    usertoken = localStorage.getItem("usertoken");
+    usertoken =
+      typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
     isUser = !!usertoken;
   }
 

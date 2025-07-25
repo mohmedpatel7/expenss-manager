@@ -31,7 +31,8 @@ const Signup: React.FC = () => {
 
   const { showToast } = useToast();
 
-  const isUser = localStorage.getItem("usertoken");
+  const isUser =
+    typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
 
   const router = useRouter();
 
