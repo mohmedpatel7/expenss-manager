@@ -320,7 +320,7 @@ const Signup: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleSendOtp}
-                      className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed mb-3"
                       disabled={isLoading}
                     >
                       {isLoading ? "Signing Up..." : "Sign Up"}
@@ -329,10 +329,10 @@ const Signup: React.FC = () => {
                 )}
                 {step === 2 && (
                   <div>
-                    <label className="block mb-2 font-medium text-gray-800">
+                    <label className="block mb-2 font-medium text-gray-800 text-center">
                       Enter OTP
                     </label>
-                    <div className="flex gap-2 mb-2">
+                    <div className="flex justify-center gap-3 mb-2 w-full">
                       {form.otp.map((digit, idx) => (
                         <input
                           key={idx}
@@ -340,7 +340,7 @@ const Signup: React.FC = () => {
                           type="text"
                           inputMode="numeric"
                           maxLength={1}
-                          className={`w-12 h-12 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
+                          className={`w-12 h-12 sm:w-16 sm:h-16 text-center text-xl border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 transition-all duration-200 ${
                             errors.otp ? "border-red-500" : "border-gray-300"
                           }`}
                           value={digit}
@@ -349,36 +349,36 @@ const Signup: React.FC = () => {
                       ))}
                     </div>
                     {(errors.otp || authError) && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-red-500 text-sm mt-1 text-center">
                         {errors.otp || authError}
                       </p>
                     )}
                     {otpResent && (
-                      <p className="text-green-600 text-sm mt-1">{otpResent}</p>
+                      <p className="text-green-600 text-sm mt-1 text-center">
+                        {otpResent}
+                      </p>
                     )}
-                    <div className="flex justify-between mt-6">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 w-full">
                       <button
                         type="button"
                         onClick={handlePrev}
-                        className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
+                        className="px-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition w-full sm:w-auto mb-3 sm:mb-0"
                       >
                         Back
                       </button>
                       <button
                         type="button"
                         onClick={handleSubmit}
-                        className="px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto mb-3 sm:mb-0"
                         disabled={finalLoading}
                       >
-                        {finalLoading
-                          ? "Submiting.."
-                          : "Verify & Complete Signup"}
+                        {finalLoading ? "Submiting.." : "Verify "}
                       </button>
                     </div>
                     <button
                       type="button"
                       onClick={handleResendOtp}
-                      className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition"
+                      className="w-full mt-4 py-2 rounded-lg border border-[#2563eb] text-[#2563eb] font-semibold hover:bg-[#e0e7ff] transition mb-3"
                     >
                       Resend OTP
                     </button>

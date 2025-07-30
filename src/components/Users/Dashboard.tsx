@@ -47,16 +47,16 @@ interface Transaction {
 }
 
 const UserInfo = React.memo(({ userProfile }: { userProfile: UserProfile }) => (
-  <div className="flex items-center gap-6 w-full md:w-auto">
+  <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 w-full md:w-auto text-center md:text-left">
     <Image
       src={userProfile.pic || "/profile.jpg"}
       alt={userProfile.name}
       width={96}
       height={96}
-      className="w-24 h-24 rounded-full border-4 border-[#2563eb] shadow-lg object-cover"
+      className="w-24 h-24 rounded-full border-4 border-[#2563eb] shadow-lg object-cover mx-auto md:mx-0"
       priority
     />
-    <div>
+    <div className="flex flex-col items-center md:items-start mt-3 md:mt-0">
       <h2 className="text-3xl font-extrabold text-[#2563eb] mb-1">
         {userProfile.name}
       </h2>
