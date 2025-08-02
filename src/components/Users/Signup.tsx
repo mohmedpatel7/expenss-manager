@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState } from "react";
 import { SendOtp, SignupUser } from "@/Redux/Slices/AuthSlices";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "@/Redux/store/store";
@@ -15,7 +15,6 @@ const Signup: React.FC = () => {
     name: "",
     dob: "",
     password: "",
-    profilePic: null as string | null,
   });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -45,16 +44,6 @@ const Signup: React.FC = () => {
     if (value && index < 3) {
       const next = document.getElementById(`otp-${index + 1}`);
       if (next) (next as HTMLInputElement).focus();
-    }
-  };
-
-  // Handle profile pic preview
-  const handleProfilePic = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (ev) =>
-        setForm({ ...form, profilePic: ev.target?.result as string });
-      reader.readAsDataURL(e.target.files[0]);
     }
   };
 
@@ -125,7 +114,6 @@ const Signup: React.FC = () => {
           otp: form.otp.join(""),
           dob: form.dob,
           password: form.password,
-          picBase64: form.profilePic || undefined,
         })
       ).unwrap();
       setForm({
@@ -134,7 +122,6 @@ const Signup: React.FC = () => {
         name: "",
         dob: "",
         password: "",
-        profilePic: null,
       });
       setConfirmPassword("");
       setErrors({});
@@ -297,26 +284,7 @@ const Signup: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-start mb-4">
-                      <label className="block mb-2 font-medium text-gray-800">
-                        Profile Pic
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="w-full"
-                        onChange={handleProfilePic}
-                      />
-                      {form.profilePic && (
-                        <div className="mt-2 flex justify-center">
-                          <img
-                            src={form.profilePic}
-                            alt="Profile Preview"
-                            className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border border-gray-200"
-                          />
-                        </div>
-                      )}
-                    </div>
+
                     <button
                       type="button"
                       onClick={handleSendOtp}
@@ -372,7 +340,7 @@ const Signup: React.FC = () => {
                         className="px-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto mb-3 sm:mb-0"
                         disabled={finalLoading}
                       >
-                        {finalLoading ? "Submiting.." : "Verify "}
+                        {finalLoading ? "Verifying.." : "Verify "}
                       </button>
                     </div>
                     <button

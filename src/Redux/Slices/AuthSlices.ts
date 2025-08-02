@@ -41,7 +41,6 @@ export const SignupUser = createAsyncThunk(
       otp: string;
       dob: string;
       password: string;
-      picBase64?: string;
     },
     { rejectWithValue }
   ) => {

@@ -265,21 +265,13 @@ const Slidebar: React.FC = () => {
         <div className="absolute bottom-6 w-full px-8">
           {isLoggedIn ? (
             <div className="flex items-center gap-3 relative">
-              {userProfile?.pic ? (
-                <Image
-                  src={userProfile.pic}
-                  alt={userProfile.name}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-[#2563eb]"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] flex items-center justify-center text-white font-bold text-lg">
-                  {userProfile?.name
-                    ? userProfile.name.charAt(0).toUpperCase()
-                    : "U"}
-                </div>
-              )}
+              <Image
+                src="/profile.jpg"
+                alt={userProfile?.name || "User"}
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover border-2 border-[#2563eb]"
+              />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-black truncate">
                   {userProfile?.name || "Username"}

@@ -3,8 +3,6 @@ import { connectDB } from "@/lib/database/dbConnection";
 import User from "@/lib/Schema/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import path from "path";
-import fs from "fs/promises";
 // @ts-expect-error: nodemailer has no ESM types
 import nodemailer from "nodemailer";
 
@@ -16,7 +14,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     const data = await req.json();
-    const { name, email, otp, dob, password, picBase64 } = data;
+    const { name, email, otp, dob, password } = data;
 
     if (!name || !email || !otp || !dob || !password) {
       return NextResponse.json(
@@ -53,25 +51,12 @@ export async function POST(req: NextRequest) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Handle profile picture (base64)
-    let profilePic: string | null = null;
-    if (picBase64) {
-      const buffer = Buffer.from(picBase64, "base64");
-      const fileName = `${Date.now()}_${Math.random()
-        .toString(36)
-        .substring(2, 8)}.png`;
-      const filePath = path.join(process.cwd(), "public", "upload", fileName);
-      await fs.writeFile(filePath, buffer);
-      profilePic = "/upload/" + fileName;
-    }
-
     // Create user
     const user = new User({
       name,
       email,
       dob,
       password: hashedPassword,
-      pic: profilePic,
     });
     await user.save();
 
