@@ -15,13 +15,11 @@ const Signin: React.FC = () => {
   const [apiError, setApiError] = useState<string | null>(null);
 
   const dispatch: AppDispatch = useDispatch();
-
   const { showToast } = useToast();
+  const router = useRouter();
 
   const isUser =
     typeof window !== "undefined" ? localStorage.getItem("usertoken") : null;
-
-  const router = useRouter();
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
@@ -36,95 +34,100 @@ const Signin: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
-    if (validate()) {
-      setLoading(true);
-      try {
-        const result = await dispatch(
-          SigninUser({ email: form.email, password: form.password })
-        ).unwrap();
-        setForm({ email: "", password: "" });
-        setLoading(false);
-        if (result?.message) showToast(result.message || "", "success");
-        else showToast("Signin successful!", "success");
-        router.push("/dashboard");
-      } catch (err: unknown) {
-        const errorMsg =
-          (err as { message?: string })?.message || "Signin failed";
-        setApiError(errorMsg);
-        setLoading(false);
-        if ((err as { message?: string })?.message)
-          showToast((err as { message?: string }).message || "", "error");
-      }
+
+    if (!validate()) return;
+
+    setLoading(true);
+
+    try {
+      const result = await dispatch(
+        SigninUser({ email: form.email, password: form.password })
+      ).unwrap();
+
+      // Clear form and redirect
+      setForm({ email: "", password: "" });
+      if (result?.message) showToast(result.message, "success");
+      else showToast("Signin successful!", "success");
+
+      router.push("/dashboard");
+    } catch (err) {
+      const errorMsg =
+        (err as { message?: string })?.message ||
+        "Signin failed. Please try again.";
+      setApiError(errorMsg);
+      showToast(errorMsg, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <div className="min-h-screen w-full bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] flex flex-col items-center justify-center py-12">
-        {!isUser && (
-          <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg text-gray-900">
-            <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb]">
-              Sign In
-            </h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="block mb-2 font-medium text-gray-800">
-                  Email
-                </label>
+    <div className="min-h-screen w-full bg-gradient-to-tr from-[#e0e7ff] via-[#f0f6ff] to-[#f8fafc] flex flex-col items-center justify-center py-12">
+      {!isUser && (
+        <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg text-gray-900">
+          <h2 className="text-2xl font-bold mb-6 text-center text-[#2563eb]">
+            Sign In
+          </h2>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <label className="block mb-2 font-medium text-gray-800">
+                Email
+              </label>
+              <input
+                type="email"
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                autoFocus
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 font-medium text-gray-800 mt-2">
+                Password
+              </label>
+              <div className="relative">
                 <input
-                  type="email"
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
-                    errors.email ? "border-red-500" : "border-gray-300"
+                  type={showPassword ? "text" : "password"}
+                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] ${
+                    errors.password ? "border-red-500" : "border-gray-300"
                   }`}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  autoFocus
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
+                <span
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </span>
               </div>
-              <div>
-                <label className="block mb-2 font-medium text-gray-800 mt-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400 ${
-                      errors.password ? "border-red-500" : "border-gray-300"
-                    }`}
-                    value={form.password}
-                    onChange={(e) =>
-                      setForm({ ...form, password: e.target.value })
-                    }
-                  />
-                  <span
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? <FaEye /> : <FaEyeSlash />}
-                  </span>
-                </div>
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                )}
-                {apiError && (
-                  <p className="text-red-500 text-sm mt-1">{apiError}</p>
-                )}
-              </div>
-              <button
-                type="submit"
-                className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={loading}
-              >
-                {loading ? "Signing In..." : "Sign In"}
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-    </>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+              {apiError && (
+                <p className="text-red-500 text-sm mt-1">{apiError}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full mt-6 py-2 rounded-lg bg-gradient-to-tr from-[#2563eb] to-[#60a5fa] text-white font-semibold shadow hover:from-[#1d4ed8] hover:to-[#3b82f6] transition disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? "Signing In..." : "Sign In"}
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
   );
 };
 
