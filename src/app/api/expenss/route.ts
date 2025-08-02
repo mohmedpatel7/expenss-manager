@@ -63,20 +63,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user has sufficient credit
-    if (creditAccount.currentCredit < amount) {
+    // Check if user has sufficient credit AND minimum ₹1 balance remains
+    if (creditAccount.currentCredit - amount < 1) {
       return NextResponse.json(
-        { message: "Insufficient credit balance" },
+        {
+          message:
+            "Insufficient credit balance. Minimum ₹1 must remain in your account.",
+        },
         { status: 400 }
       );
     }
 
-    // Find or create expense category
+    // Find expense category
     let expenseCategory = await Expenss.findOne({
       userId,
       title: title,
     });
 
+    // 🛑 If no category and balance is 0, prevent creation
+    if (!expenseCategory && creditAccount.currentCredit <= 0) {
+      return NextResponse.json(
+        {
+          message:
+            "Cannot create new category with ₹0 balance. Please add credit first.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Create new category if not found
     if (!expenseCategory) {
       expenseCategory = new Expenss({
         userId,

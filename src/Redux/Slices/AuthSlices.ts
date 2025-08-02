@@ -144,6 +144,44 @@ export const fetchUserProfile = createAsyncThunk(
   }
 );
 
+// Thunk to update user profile
+export const updateUserProfile = createAsyncThunk(
+  "auth/updateUserProfile",
+  async (
+    {
+      usertoken,
+      name,
+      dob,
+    }: {
+      usertoken: string;
+      name: string;
+      dob: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await fetch("/api/auth/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          usertoken,
+        },
+        body: JSON.stringify({ name, dob }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return rejectWithValue(data.message || "Failed to update user profile");
+      }
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || "Network error");
+      }
+      return rejectWithValue("Network error");
+    }
+  }
+);
+
 // Interface for the authentication slice state
 interface DataInterface {
   sendOtpState: { message: string } | null; // State for OTP response
@@ -254,6 +292,21 @@ const authSlice = createSlice({
         state.userProfile = null;
         state.error =
           (action.payload as string) || "Failed to fetch user profile";
+      })
+      // Update user profile cases
+      .addCase(updateUserProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userProfile = action.payload.user;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          (action.payload as string) || "Failed to update user profile";
       });
   },
 });

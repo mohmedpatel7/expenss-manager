@@ -67,12 +67,18 @@ const Categories: React.FC = () => {
   const handleAddCategory = async () => {
     if (!category.trim() || !usertoken) return;
     try {
-      await dispatch(
+      const result = await dispatch(
         postExpense({ title: category.trim(), amount: 1, userToken: usertoken })
       ).unwrap();
-      showToast("Category created!", "success");
-      setCategory("");
-      dispatch(fetchExpenseCategories(usertoken));
+
+      // Only show success toast if API succeeded
+      if (result && result.message === "Expense recorded successfully") {
+        showToast("Category created!", "success");
+        setCategory("");
+        dispatch(fetchExpenseCategories(usertoken));
+      } else {
+        showToast(result?.message || "Could not create category", "error");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         showToast(err.message, "error");

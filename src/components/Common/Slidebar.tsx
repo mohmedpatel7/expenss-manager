@@ -8,6 +8,7 @@ import { FaChevronUp } from "react-icons/fa";
 import { useToast } from "../Common/Toast";
 import { fetchUserProfile } from "@/Redux/Slices/AuthSlices";
 import Image from "next/image";
+import UpdateProfileModal from "../Users/UpdateProfile";
 
 const navItems = [
   {
@@ -94,6 +95,7 @@ const navItems = [
 const Slidebar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showUpdateProfile, setShowUpdateProfile] = useState(false);
   const dispatch: AppDispatch = useDispatch();
   const userProfile = useSelector((state: RootState) => state.auth.userProfile);
   // For demo, Home is active by default
@@ -303,7 +305,15 @@ const Slidebar: React.FC = () => {
                   ref={dropupRef}
                   className="absolute left-0 right-0 bottom-14 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 animate-fade-in px-6 py-3"
                 >
-                  {/* <button className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg">Profile</button> */}
+                  <button
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg text-[#2563eb] font-semibold"
+                    onClick={() => {
+                      setShowUpdateProfile(true);
+                      setShowDropup(false);
+                    }}
+                  >
+                    Update Profile
+                  </button>
                   <button
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-lg text-red-600 font-semibold"
                     onClick={() => {
@@ -344,6 +354,12 @@ const Slidebar: React.FC = () => {
         </div>
       </div>
       {/* End Sidebar */}
+
+      {/* Update Profile Modal */}
+      <UpdateProfileModal
+        open={showUpdateProfile}
+        onClose={() => setShowUpdateProfile(false)}
+      />
     </>
   );
 };
