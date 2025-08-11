@@ -8,6 +8,8 @@ export const updateAmount = createAsyncThunk(
       currentCredit: number;
       type: string;
       usertoken: string;
+      description?: string;
+      date?: string | Date;
     },
     { rejectWithValue }
   ) => {
@@ -21,6 +23,8 @@ export const updateAmount = createAsyncThunk(
         body: JSON.stringify({
           currentCredit: formData.currentCredit,
           type: formData.type,
+          description: formData.description,
+          date: formData.date,
         }),
       });
       const data = await response.json();

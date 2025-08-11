@@ -41,7 +41,12 @@ export async function POST(req: NextRequest) {
     const email = user.email;
 
     // Parse request body
-    const { currentCredit: rawCredit, type } = await req.json();
+    const {
+      currentCredit: rawCredit,
+      type,
+      description,
+      date,
+    } = await req.json();
     const currentCredit = Number(rawCredit);
     if (isNaN(currentCredit) || !type) {
       return NextResponse.json(
@@ -75,6 +80,10 @@ export async function POST(req: NextRequest) {
     account.history.push({
       type,
       amount: currentCredit,
+      date: date ? new Date(date) : new Date(),
+      description:
+        description ||
+        `${type === "credit" ? "Credit added" : "Debit deducted"} to account`,
       currentAmount: newCredit,
     });
     await account.save();
@@ -168,7 +177,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Sort the history array by date descending (most recent first)
+    // Sort the history array by date descending (latest first)
     account.history = account.history.sort(
       (a: { date: string | Date }, b: { date: string | Date }) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()

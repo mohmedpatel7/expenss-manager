@@ -19,6 +19,8 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("credit");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   const isUser =
@@ -40,9 +42,13 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
     };
   }, [open]);
 
-  // Reset amount when modal opens/closes
+  // Reset form fields when modal opens/closes
   useEffect(() => {
-    if (!open) setAmount("");
+    if (!open) {
+      setAmount("");
+      setDescription("");
+      setDate("");
+    }
   }, [open]);
 
   // Close modal on overlay click
@@ -62,6 +68,8 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
         updateAmount({
           currentCredit: Number(amount),
           type,
+          description: description.trim() || undefined,
+          date: date || undefined,
           usertoken: isUser,
         })
       );
@@ -160,6 +168,37 @@ const AmountUpdateModal: React.FC<AmountUpdateModalProps> = ({
                   <option value="credit">Credit</option>
                   <option value="debit">Debit</option>
                 </select>
+              </div>
+              <div>
+                <label
+                  className="block mb-2 font-medium text-gray-800"
+                  htmlFor="description"
+                >
+                  Description (Optional)
+                </label>
+                <input
+                  id="description"
+                  type="text"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900 placeholder-gray-400"
+                  placeholder="Enter description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              <div>
+                <label
+                  className="block mb-2 font-medium text-gray-800"
+                  htmlFor="date"
+                >
+                  Date (Optional)
+                </label>
+                <input
+                  id="date"
+                  type="date"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563eb] border-gray-300 text-gray-900"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
               </div>
               <button
                 type="submit"

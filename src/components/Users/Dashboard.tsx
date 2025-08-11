@@ -44,6 +44,7 @@ interface Transaction {
   amount: number;
   date: string;
   currentAmount: number;
+  description?: string;
 }
 
 const UserInfo = React.memo(({ userProfile }: { userProfile: UserProfile }) => (
@@ -117,23 +118,32 @@ const Transactions = React.memo(
                     animation: `fadeInUp 0.5s ease ${idx * 0.08 + 0.1}s both`,
                   }}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`inline-block w-3 h-3 rounded-full ${
-                        txn.type === "credit" ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    ></span>
-                    <span className="capitalize font-semibold text-gray-700 text-base">
-                      {txn.type}
-                    </span>
-                    <span className="text-gray-400 text-sm ml-2 whitespace-nowrap">
-                      {new Date(txn.date).toLocaleDateString()}{" "}
-                      {new Date(txn.date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })}
-                    </span>
+                  <div className="flex flex-col min-w-0 flex-grow">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`inline-block w-3 h-3 rounded-full ${
+                          txn.type === "credit" ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      ></span>
+                      <span className="capitalize font-semibold text-gray-700 text-base">
+                        {txn.type}
+                      </span>
+                      <span className="text-gray-400 text-sm whitespace-nowrap">
+                        {new Date(txn.date).toLocaleDateString()}{" "}
+                        {new Date(txn.date).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
+                      </span>
+                    </div>
+                    {txn.description && (
+                      <div className="ml-6 mt-1">
+                        <span className="text-gray-600 text-sm">
+                          {txn.description}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col items-end min-w-[120px]">
                     <span
