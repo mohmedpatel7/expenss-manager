@@ -17,6 +17,7 @@ const expenseCategorySchema = new mongoose.Schema(
       {
         amount: { type: Number, required: true },
         type: { type: String, default: "debit", required: true },
+        description: { type: String, required: true },
         date: { type: Date, required: true },
         currentAmount: { type: Number, required: true },
       },

@@ -153,9 +153,16 @@ const CategoriesIndex: React.FC = () => {
                           txn.type === "credit" ? "bg-green-500" : "bg-red-500"
                         }`}
                       ></span>
-                      <span className="capitalize font-semibold text-gray-700 text-base">
-                        {txn.type}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="capitalize font-semibold text-gray-700 text-base">
+                          {txn.type}
+                        </span>
+                        {txn.description && (
+                          <span className="text-gray-500 text-sm">
+                            {txn.description}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-gray-400 text-sm ml-2 whitespace-nowrap">
                         {formatDateTime(txn.date)}
                       </span>

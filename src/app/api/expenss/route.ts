@@ -207,7 +207,13 @@ export async function GET(req: NextRequest) {
       userId: string;
       title: string;
       creditAccountId: string;
-      expenses: { date: string | Date }[];
+      expenses: { 
+        date: string | Date;
+        description?: string;
+        amount: number;
+        type: string;
+        currentAmount: number;
+      }[];
       [key: string]: unknown;
     };
     const sortedResult = (result as CategoryWithExpenses[])
@@ -313,6 +319,7 @@ export async function PUT(req: NextRequest) {
       amount,
       type: "debit",
       date: new Date(),
+      description: expenseCategory.title,
       currentAmount: creditAccount.currentCredit - amount,
     });
     await expenseCategory.save();
@@ -323,6 +330,7 @@ export async function PUT(req: NextRequest) {
       type: "debit",
       amount,
       date: new Date(),
+      description: `Expense deducted for ${expenseCategory.title}`,
       currentAmount: creditAccount.currentCredit,
     });
     await creditAccount.save();
