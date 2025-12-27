@@ -5,6 +5,7 @@ export interface Expense {
   amount: number;
   type: string;
   date: string;
+  description?: string;
   currentAmount: number;
 }
 
